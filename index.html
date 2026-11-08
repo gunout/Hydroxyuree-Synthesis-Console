@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydroxyurée Synthesis Console · CH₄N₂O₂</title>
+<style>
+  :root {
+    --fr-blue:#0055A4; --fr-blue-dark:#003F7D; --fr-blue-light:#E6EEF7; --fr-blue-soft:#B8CCE4;
+    --fr-red:#EF4135; --fr-red-dark:#C42B20; --fr-red-light:#FDE9E7; --fr-white:#FFFFFF;
+    --bg:#F4F7FB; --bg-2:#FFFFFF; --bg-3:#EEF3F9;
+    --panel:#FFFFFF; --panel-2:#F7FAFD; --panel-3:#EAF1F8;
+    --border:#D6E0EC; --border-2:#B8CCE4;
+    --text:#0B2545; --text-2:#2C4A6E; --text-3:#6B7F98;
+    --accent:#0055A4; --accent-soft:#E6EEF7;
+    --green:#1B7F4B; --green-soft:#E3F5EC;
+    --yellow:#B8860B; --yellow-soft:#FBF1D9;
+    --orange:#D97706; --red:#EF4135; --red-soft:#FDE9E7;
+    --purple:#6B4FBB; --purple-soft:#EFE9FB;
+    --cyan:#0E7490;
+    --radius:6px; --radius-lg:10px;
+    --mono:'SF Mono','JetBrains Mono','Roboto Mono',Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Roboto,sans-serif;
+    --shadow-sm:0 1px 2px rgba(11,37,69,.06);
+    --shadow-md:0 4px 12px rgba(11,37,69,.08);
+    --shadow-lg:0 12px 32px rgba(11,37,69,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer}
+  input,select,button{font-family:inherit;font-size:inherit;color:inherit}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:var(--bg-3)}
+  ::-webkit-scrollbar-thumb{background:var(--fr-blue-soft);border-radius:5px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--fr-blue)}
+
+  .tricolore-bar{position:fixed;top:0;left:0;right:0;height:3px;display:flex;z-index:9999}
+  .tricolore-bar span{flex:1;height:100%}
+  .tricolore-bar .b{background:var(--fr-blue)}
+  .tricolore-bar .w{background:var(--fr-white);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .tricolore-bar .r{background:var(--fr-red)}
+
+  .app-shell{display:grid;grid-template-columns:240px 1fr;grid-template-rows:52px 1fr 28px;
+    grid-template-areas:"topbar topbar" "sidebar main" "statusbar statusbar";
+    height:100vh;overflow:hidden;padding-top:3px}
+  @media(max-width:900px){.app-shell{grid-template-columns:1fr;grid-template-areas:"topbar" "main" "statusbar"}.sidebar{display:none}}
+
+  .topbar{grid-area:topbar;background:var(--bg-2);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 16px;gap:16px;z-index:10;box-shadow:var(--shadow-sm)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;letter-spacing:-.2px}
+  .brand-logo{width:28px;height:28px;border-radius:5px;overflow:hidden;display:flex;box-shadow:0 0 0 1px var(--border)}
+  .brand-logo span{flex:1}
+  .brand-logo .b{background:var(--fr-blue)} .brand-logo .w{background:var(--fr-white)} .brand-logo .r{background:var(--fr-red)}
+  .brand-sub{color:var(--text-3);font-weight:400;font-size:11px}
+  .topbar-divider{width:1px;height:22px;background:var(--border)}
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3)}
+  .breadcrumb span.active{color:var(--fr-blue);font-weight:600}
+  .breadcrumb .sep{color:var(--border-2)}
+  .topbar-spacer{flex:1}
+  .topbar-actions{display:flex;align-items:center;gap:8px}
+  .conn-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);
+    font-family:var(--mono);padding:4px 10px;border-radius:4px;background:var(--green-soft);border:1px solid rgba(27,127,75,.25)}
+  .conn-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulseDot 2s infinite}
+  @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.4}}
+  .icon-btn{width:32px;height:32px;border:1px solid var(--border);background:var(--bg-2);border-radius:6px;
+    display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all .15s;font-size:14px}
+  .icon-btn:hover{background:var(--accent-soft);color:var(--fr-blue);border-color:var(--fr-blue)}
+  .btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-2);
+    color:var(--text);font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+  .btn:hover{background:var(--accent-soft);border-color:var(--fr-blue);color:var(--fr-blue)}
+  .btn.primary{background:var(--fr-blue);border-color:var(--fr-blue);color:white}
+  .btn.primary:hover{background:var(--fr-blue-dark);border-color:var(--fr-blue-dark)}
+  .btn.danger{color:var(--fr-red);border-color:rgba(239,65,53,.3);background:white}
+  .btn.danger:hover{background:var(--fr-red-soft);border-color:var(--fr-red)}
+
+  .sidebar{grid-area:sidebar;background:var(--bg-2);border-right:1px solid var(--border);overflow-y:auto;padding:12px 8px}
+  .nav-section{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);
+    padding:12px 10px 6px;font-weight:700}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;color:var(--text-2);
+    cursor:pointer;font-size:12.5px;font-weight:500;transition:all .12s;border:1px solid transparent;
+    width:100%;background:transparent;text-align:left;position:relative}
+  .nav-item:hover{background:var(--accent-soft);color:var(--fr-blue)}
+  .nav-item.active{background:var(--accent-soft);color:var(--fr-blue);border-color:var(--fr-blue-soft);font-weight:600}
+  .nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+    width:3px;height:18px;background:var(--fr-blue);border-radius:0 3px 3px 0}
+  .nav-item .nav-icon{width:16px;text-align:center;font-size:13px;opacity:.9}
+  .nav-item .nav-badge{margin-left:auto;font-size:10px;font-family:var(--mono);background:var(--bg-3);
+    padding:1px 6px;border-radius:8px;color:var(--text-3)}
+  .nav-item.active .nav-badge{background:var(--fr-blue);color:white}
+
+  .main{grid-area:main;overflow-y:auto;padding:20px 24px;background:var(--bg)}
+  .page{display:none}
+  .page.active{display:block;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+  .page-header{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;
+    flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:2px solid var(--fr-blue);position:relative}
+  .page-header::after{content:'';position:absolute;bottom:-2px;left:0;width:60px;height:2px;background:var(--fr-red)}
+  .page-header h1{font-size:18px;font-weight:700;letter-spacing:-.3px;color:var(--fr-blue-dark)}
+  .page-header p{color:var(--text-3);font-size:12px;margin-top:2px}
+  .page-header-actions{display:flex;gap:8px}
+
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+    overflow:hidden;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow-sm)}
+  .panel:hover{border-color:var(--fr-blue-soft);box-shadow:var(--shadow-md)}
+  .panel-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;
+    border-bottom:1px solid var(--border);background:var(--panel-2)}
+  .panel-header h2{font-size:12.5px;font-weight:700;letter-spacing:-.1px;display:flex;align-items:center;
+    gap:8px;color:var(--fr-blue-dark)}
+  .panel-header h2::before{content:'';width:3px;height:14px;background:var(--fr-blue);border-radius:2px}
+  .panel-header .panel-meta{font-size:11px;color:var(--text-3);font-family:var(--mono)}
+  .panel-body{padding:16px}
+  .panel-body.flush{padding:0}
+
+  .kpi{padding:14px 16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+    transition:all .15s;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--fr-blue) 0%,var(--fr-blue) 33%,var(--fr-white) 33%,var(--fr-white) 66%,var(--fr-red) 66%,var(--fr-red) 100%)}
+  .kpi:hover{border-color:var(--fr-blue);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+  .kpi-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-3);
+    font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .kpi-value{font-size:22px;font-weight:700;letter-spacing:-.5px;margin:6px 0 4px;
+    font-family:var(--mono);color:var(--fr-blue-dark)}
+  .kpi-value small{font-size:12px;color:var(--text-3);font-weight:500;margin-left:2px}
+  .kpi-sub{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+
+  .table{width:100%;border-collapse:collapse;font-size:12px}
+  .table th{text-align:left;padding:8px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--fr-blue-dark);border-bottom:2px solid var(--fr-blue-soft);
+    background:var(--panel-2);white-space:nowrap}
+  .table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text-2)}
+  .table tbody tr:hover td{background:var(--accent-soft);color:var(--text)}
+  .table tbody tr:last-child td{border-bottom:none}
+  .table .num{text-align:right;font-family:var(--mono)}
+  .table .accent{color:var(--fr-blue);font-weight:600}
+  .table .mono{font-family:var(--mono)}
+
+  .tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10.5px;
+    font-weight:700;font-family:var(--mono);letter-spacing:.2px}
+  .tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+  .tag.green{background:var(--green-soft);color:var(--green)}
+  .tag.yellow{background:var(--yellow-soft);color:var(--yellow)}
+  .tag.orange{background:#FDF0E1;color:var(--orange)}
+  .tag.red{background:var(--fr-red-soft);color:var(--fr-red-dark)}
+  .tag.blue{background:var(--accent-soft);color:var(--fr-blue)}
+  .tag.purple{background:var(--purple-soft);color:var(--purple)}
+  .tag.gray{background:var(--bg-3);color:var(--text-3)}
+
+  .field{margin-bottom:14px} .field:last-child{margin-bottom:0}
+  .field-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .field-label{font-size:11.5px;color:var(--text-2);font-weight:600}
+  .field-value{font-family:var(--mono);font-size:11.5px;color:var(--fr-blue);font-weight:700}
+  input[type="range"]{width:100%;height:4px;-webkit-appearance:none;background:var(--bg-3);border-radius:2px;outline:none;cursor:pointer}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+    background:var(--fr-blue);border:2px solid white;box-shadow:0 0 0 1px var(--fr-blue),0 0 8px rgba(0,85,164,.3);cursor:pointer;transition:transform .12s}
+  input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+  select,input[type="number"],input[type="text"]{width:100%;padding:6px 10px;background:var(--bg-2);
+    border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;
+    font-family:var(--mono);outline:none;transition:border-color .15s}
+  select:focus,input:focus{border-color:var(--fr-blue);box-shadow:0 0 0 3px rgba(0,85,164,.1)}
+
+  .value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+  .value-item{padding:10px 12px;background:var(--panel-2);border-radius:6px;border:1px solid transparent;transition:all .15s}
+  .value-item:hover{border-color:var(--fr-blue-soft);background:var(--accent-soft)}
+  .value-item .v-label{font-size:10.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .value-item .v-value{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--fr-blue);margin-top:3px;letter-spacing:-.2px}
+  .value-item .v-value.green{color:var(--green)}
+  .value-item .v-value.yellow{color:var(--yellow)}
+  .value-item .v-value.red{color:var(--fr-red)}
+  .value-item .v-value.purple{color:var(--purple)}
+
+  .alert{display:flex;gap:10px;padding:10px 12px;border-radius:6px;font-size:12px;line-height:1.5;
+    border:1px solid;margin-top:12px;border-left-width:4px}
+  .alert-icon{flex-shrink:0;font-size:14px}
+  .alert.info{background:var(--accent-soft);border-color:var(--fr-blue-soft);border-left-color:var(--fr-blue);color:var(--text-2)}
+  .alert.warn{background:var(--yellow-soft);border-color:#EFD9A0;border-left-color:var(--yellow);color:var(--text-2)}
+  .alert.danger{background:var(--fr-red-soft);border-color:#F5B7B1;border-left-color:var(--fr-red);color:var(--text-2)}
+  .alert.success{background:var(--green-soft);border-color:#A7DCC3;border-left-color:var(--green);color:var(--text-2)}
+  .alert strong{color:var(--text)}
+
+  .chart-wrap{position:relative;width:100%}
+  .chart-wrap canvas{display:block;width:100%}
+  .chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:11px;color:var(--text-3)}
+  .chart-legend-item{display:flex;align-items:center;gap:6px}
+  .chart-legend-dot{width:10px;height:3px;border-radius:2px}
+
+  .pfd{display:flex;align-items:center;gap:0;padding:24px 16px;background:var(--panel-2);
+    border-radius:8px;overflow-x:auto;border:1px solid var(--border)}
+  .pfd-node{flex-shrink:0;padding:10px 14px;background:white;border:2px solid var(--border-2);border-radius:6px;
+    font-size:11.5px;font-weight:700;font-family:var(--mono);text-align:center;min-width:90px;
+    transition:all .15s;cursor:default;color:var(--text-2)}
+  .pfd-node:hover{border-color:var(--fr-blue);box-shadow:0 0 0 3px rgba(0,85,164,.1);color:var(--fr-blue)}
+  .pfd-node.accent{border-color:var(--fr-blue);color:var(--fr-blue);background:var(--accent-soft)}
+  .pfd-node.purple{border-color:var(--purple);color:var(--purple);background:var(--purple-soft)}
+  .pfd-node.green{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .pfd-node.yellow{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-soft)}
+  .pfd-node.red{border-color:var(--fr-red);color:var(--fr-red);background:var(--fr-red-soft)}
+  .pfd-arrow{flex-shrink:0;color:var(--fr-blue-soft);padding:0 8px;font-size:14px;font-weight:700}
+
+  .gauge{padding:12px;background:var(--panel-2);border-radius:8px;text-align:center;
+    transition:all .15s;border:1px solid transparent}
+  .gauge:hover{background:var(--accent-soft);border-color:var(--fr-blue-soft)}
+  .gauge-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);font-weight:700}
+  .gauge-value{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--fr-blue-dark);margin:4px 0 6px;letter-spacing:-.3px}
+  .gauge-bar{height:4px;background:var(--bg-3);border-radius:2px;overflow:hidden}
+  .gauge-fill{height:100%;background:var(--fr-blue);border-radius:2px;transition:width .3s ease}
+  .gauge-fill.green{background:var(--green)}
+  .gauge-fill.yellow{background:var(--yellow)}
+  .gauge-fill.red{background:var(--fr-red)}
+
+  .statusbar{grid-area:statusbar;background:var(--fr-blue-dark);color:rgba(255,255,255,.85);
+    display:flex;align-items:center;padding:0 16px;font-size:11px;font-family:var(--mono);gap:16px;position:relative}
+  .statusbar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--fr-blue) 0%,var(--fr-blue) 33%,var(--fr-white) 33%,var(--fr-white) 66%,var(--fr-red) 66%,var(--fr-red) 100%)}
+  .statusbar .sb-item{display:flex;align-items:center;gap:6px}
+  .statusbar .sb-dot{width:6px;height:6px;border-radius:50%}
+  .statusbar .sb-dot.green{background:#4ADE80;box-shadow:0 0 4px #4ADE80}
+  .statusbar .sb-spacer{flex:1}
+
+  .mol-canvas{width:100%;height:400px;background:var(--panel-2);border-radius:8px;border:1px solid var(--border);
+    display:block;cursor:crosshair}
+  .mol-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .mol-toolbar .spacer{flex:1}
+  .counter{font-family:var(--mono);font-size:11px;display:flex;gap:12px;color:var(--text-3);
+    padding:6px 12px;background:var(--panel-2);border-radius:6px;border:1px solid var(--border)}
+  .counter span strong{font-weight:700}
+
+  .toast-container{position:fixed;bottom:40px;right:20px;display:flex;flex-direction:column;gap:8px;
+    z-index:1000;pointer-events:none}
+  .toast{background:white;border:1px solid var(--border);border-left:4px solid var(--fr-blue);
+    padding:10px 14px;border-radius:6px;font-size:12px;box-shadow:var(--shadow-lg);min-width:240px;
+    max-width:360px;pointer-events:auto;animation:slideIn .25s ease;display:flex;gap:10px;align-items:flex-start}
+  .toast.success{border-left-color:var(--green)}
+  .toast.warn{border-left-color:var(--yellow)}
+  .toast.error{border-left-color:var(--fr-red)}
+  .toast-title{font-weight:700;color:var(--fr-blue-dark);font-size:12px}
+  .toast-msg{color:var(--text-3);font-size:11px;margin-top:1px}
+  @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(11,37,69,.5);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+  .modal-overlay.visible{display:flex}
+  .modal{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);
+    max-width:560px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);position:relative}
+  .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--fr-blue) 0%,var(--fr-blue) 33%,var(--fr-white) 33%,var(--fr-white) 66%,var(--fr-red) 66%,var(--fr-red) 100%)}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 12px;
+    border-bottom:1px solid var(--border)}
+  .modal-header h3{font-size:14px;font-weight:700;color:var(--fr-blue-dark)}
+  .modal-close{background:none;border:none;color:var(--text-3);font-size:20px;width:28px;height:28px;
+    border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .modal-close:hover{background:var(--fr-red-soft);color:var(--fr-red)}
+  .modal-body{padding:18px;font-size:12.5px;color:var(--text-2);line-height:1.6}
+  .modal-body h4{font-size:12.5px;color:var(--fr-blue-dark);margin:12px 0 6px}
+  .modal-body ul{margin-left:18px;margin-top:6px}
+  .modal-body li{margin-bottom:4px}
+
+  .tooltip{position:fixed;background:var(--fr-blue-dark);color:white;padding:8px 12px;border-radius:6px;
+    font-size:11.5px;max-width:260px;pointer-events:none;opacity:0;transition:opacity .12s;
+    z-index:1000;box-shadow:var(--shadow-lg);line-height:1.5;font-family:var(--mono)}
+  .tooltip.visible{opacity:1}
+  .tooltip strong{color:#7CB8FF}
+
+  .divider{height:1px;background:var(--border);margin:12px 0}
+  .text-muted{color:var(--text-3)} .text-accent{color:var(--fr-blue)}
+  .text-green{color:var(--green)} .text-yellow{color:var(--yellow)} .text-red{color:var(--fr-red)}
+  .mono{font-family:var(--mono)}
+  .mt-8{margin-top:8px} .mt-12{margin-top:12px} .mt-16{margin-top:16px}
+  .formula{background:var(--panel-2);border-left:3px solid var(--fr-blue);padding:10px 14px;
+    border-radius:4px;font-family:var(--mono);font-size:12.5px;margin:8px 0;color:var(--fr-blue-dark);overflow-x:auto}
+
+  @media print{.topbar,.sidebar,.statusbar,.btn,.icon-btn{display:none!important}
+    .app-shell{display:block;height:auto}.main{padding:0;overflow:visible}.panel{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="tricolore-bar"><span class="b"></span><span class="w"></span><span class="r"></span></div>
+
+<div class="app-shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo"><span class="b"></span><span class="w"></span><span class="r"></span></div>
+      <div>
+        <div>Hydroxyurée Synthesis Console</div>
+        <div class="brand-sub">CH₄N₂O₂ · API pharmaceutique · v1.0</div>
+      </div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="breadcrumb">
+      <span>Projets</span><span class="sep">/</span>
+      <span>Hydroxyurée</span><span class="sep">/</span>
+      <span class="active" id="crumbPage">Vue d'ensemble</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-actions">
+      <div class="conn-status"><div class="conn-dot"></div><span>GMP</span></div>
+      <button class="btn" id="exportBtn">📥 Export</button>
+      <button class="icon-btn" id="printBtn">🖨</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-section">Analyse</div>
+    <button class="nav-item active" data-page="overview"><span class="nav-icon">📊</span>Vue d'ensemble</button>
+    <button class="nav-item" data-page="builder"><span class="nav-icon">⚛️</span>Constructeur</button>
+    <button class="nav-item" data-page="reactor"><span class="nav-icon">🔥</span>Réacteur</button>
+    <button class="nav-item" data-page="thermo"><span class="nav-icon">🌡️</span>Thermodynamique</button>
+    <div class="nav-section">Ingénierie</div>
+    <button class="nav-item" data-page="kinetics"><span class="nav-icon">⏱️</span>Cinétique</button>
+    <button class="nav-item" data-page="economy"><span class="nav-icon">💰</span>Économie</button>
+    <button class="nav-item" data-page="safety"><span class="nav-icon">⚠️</span>Sécurité HAZOP</button>
+    <button class="nav-item" data-page="specs"><span class="nav-icon">📋</span>Pharmacopée</button>
+    <div class="nav-section">Ressources</div>
+    <button class="nav-item" data-page="docs"><span class="nav-icon">📚</span>Documentation</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section class="page active" id="page-overview">
+      <div class="page-header">
+        <div>
+          <h1>Vue d'ensemble · Synthèse de l'hydroxyurée</h1>
+          <p>NH₂OH·HCl + NaOCN → CH₄N₂O₂ + NaCl · voie cyanate/hydroxylamine</p>
+        </div>
+        <div class="page-header-actions"><span class="tag green">Procédé validé</span></div>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="kpi">
+          <div class="kpi-label">Rendement global <span class="tag blue">Y</span></div>
+          <div class="kpi-value">88 <small>%</small></div>
+          <div class="kpi-sub">Pureté 99,5 % · USP/Ph. Eur.</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Masse molaire <span class="tag purple">M</span></div>
+          <div class="kpi-value">76,05 <small>g/mol</small></div>
+          <div class="kpi-sub">CH₄N₂O₂ · formule brute</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">pKa (hydroxyle) <span class="tag yellow">pH</span></div>
+          <div class="kpi-value">10,5</div>
+          <div class="kpi-sub">Ionisation NH-OH ⇌ NH-O⁻ + H⁺</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Coût production <span class="tag red">OPEX</span></div>
+          <div class="kpi-value">312 <small>€/kg</small></div>
+          <div class="kpi-sub">Grade pharmacopée · batch 200 kg</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2 mt-16">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Stœchiométrie de la réaction</h2>
+            <span class="panel-meta">bilan matière</span>
+          </div>
+          <div class="panel-body">
+            <div class="pfd" style="justify-content:center;padding:20px 12px;">
+              <div class="pfd-node accent">NH₂OH·HCl<br><small style="opacity:.7">69,49 g</small></div>
+              <div class="pfd-arrow">+</div>
+              <div class="pfd-node purple">NaOCN<br><small style="opacity:.7">65,01 g</small></div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node green">CH₄N₂O₂<br><small style="opacity:.7">76,05 g</small></div>
+              <div class="pfd-arrow">+</div>
+              <div class="pfd-node red">NaCl<br><small style="opacity:.7">58,44 g</small></div>
+            </div>
+            <div class="value-grid mt-12">
+              <div class="value-item"><div class="v-label">Ratio molaire</div><div class="v-value">1 : 1</div></div>
+              <div class="value-item"><div class="v-label">Rendement théorique</div><div class="v-value green">56,5 %</div></div>
+              <div class="value-item"><div class="v-label">Conservation masse</div><div class="v-value green">134,50 → 134,49</div></div>
+            </div>
+            <div class="alert info">
+              <span class="alert-icon">ℹ️</span>
+              <div>Le rendement massique est limité par la masse du sel (NaCl) co-produit. Rendement molaire quantitatif possible en conditions optimales (pH 8, T 60 °C).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Schéma de procédé (PFD)</h2>
+            <span class="panel-meta">batch 200 kg</span>
+          </div>
+          <div class="panel-body">
+            <div class="pfd">
+              <div class="pfd-node accent" data-tooltip="<strong>NH₂OH·HCl</strong><br>Chlorhydrate d'hydroxylamine">NH₂OH·HCl</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node" data-tooltip="<strong>Dissolution</strong><br>Eau purifiée · 20 °C">Diss.</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node yellow" data-tooltip="<strong>Réacteur batch</strong><br>Agitation · régulation pH">Réact.</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node green" data-tooltip="<strong>Cristallisation</strong><br>Refroidissement lent">Crist.</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node" data-tooltip="<strong>Filtration</strong><br>Lavage eau glacée">Filt.</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node accent" data-tooltip="<strong>Séchage</strong><br>Étuve 60 °C · sous vide">Séch.</div>
+            </div>
+            <div class="pfd mt-8" style="padding-top:12px;padding-bottom:12px;">
+              <div class="pfd-node purple" data-tooltip="<strong>NaOCN</strong><br>Cyanate de sodium">NaOCN</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node" data-tooltip="<strong>Dissolution séparée</strong><br>Eau · 15 °C">Diss.</div>
+              <div class="pfd-arrow">→</div>
+              <div class="pfd-node yellow" data-tooltip="<strong>Dosage lent</strong><br>30 min · anti-emballement">Dose</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-16">
+        <div class="panel-header"><h2>Applications thérapeutiques</h2><span class="panel-meta">4 indications</span></div>
+        <div class="panel-body">
+          <div class="grid grid-4">
+            <div class="kpi" style="cursor:pointer" data-modal="app-sickle">
+              <div class="kpi-label">🩸 Drépanocytose</div>
+              <div class="kpi-sub mt-8">Inducteur d'HbF · réduction des crises vaso-occlusives.</div>
+            </div>
+            <div class="kpi" style="cursor:pointer" data-modal="app-leukemia">
+              <div class="kpi-label">🎗️ Leucémie</div>
+              <div class="kpi-sub mt-8">Inhibiteur de ribonucléotide réductase (LMC, LMC).</div>
+            </div>
+            <div class="kpi" style="cursor:pointer" data-modal="app-cancer">
+              <div class="kpi-label">🔬 Tumeurs solides</div>
+              <div class="kpi-sub mt-8">Mélanome, cancer ORL, glioblastome (association radiothérapie).</div>
+            </div>
+            <div class="kpi" style="cursor:pointer" data-modal="app-hiv">
+              <div class="kpi-label">🧬 VIH (investig.)</div>
+              <div class="kpi-sub mt-8">Sensibilisation à la didanosine · essais cliniques.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUILDER -->
+    <section class="page" id="page-builder">
+      <div class="page-header">
+        <div>
+          <h1>Constructeur moléculaire</h1>
+          <p>NH₂OH·HCl + NaOCN → CH₄N₂O₂ + NaCl · reaction stœchiométrique 1:1</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Espace de réaction</h2>
+          <div class="counter">
+            <span>NH₂OH·HCl <strong id="countA" style="color:var(--fr-blue)">0</strong></span>
+            <span>NaOCN <strong id="countB" style="color:var(--purple)">0</strong></span>
+            <span>CH₄N₂O₂ <strong id="countC" style="color:var(--green)">0</strong></span>
+            <span>NaCl <strong id="countD" style="color:var(--fr-red)">0</strong></span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="mol-toolbar">
+            <button class="btn" id="addA">+ NH₂OH·HCl</button>
+            <button class="btn" id="addB">+ NaOCN</button>
+            <button class="btn primary" id="reactBtn">⚡ Faire réagir</button>
+            <div class="spacer"></div>
+            <button class="btn danger" id="resetMol">Réinitialiser</button>
+          </div>
+          <canvas class="mol-canvas" id="molCanvas"></canvas>
+          <div class="grid grid-3 mt-12">
+            <div class="value-item"><div class="v-label">Réactif limitant</div><div class="v-value" id="molLimitant">—</div></div>
+            <div class="value-item"><div class="v-label">CH₄N₂O₂ produites</div><div class="v-value green" id="molProduit">0</div></div>
+            <div class="value-item"><div class="v-label">Excès</div><div class="v-value yellow" id="molExces">—</div></div>
+          </div>
+          <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <div>Réaction 1:1. Chaque mole de <strong>NH₂OH·HCl</strong> réagit avec une mole de <strong>NaOCN</strong> pour produire une mole de <strong>CH₄N₂O₂</strong> et une mole de <strong>NaCl</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REACTOR -->
+    <section class="page" id="page-reactor">
+      <div class="page-header">
+        <div>
+          <h1>Réacteur batch</h1>
+          <p>Cuve agitée · 200 L · inox 316L · double enveloppe · pH-stat</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn primary" id="playReactor">▶ Démarrer</button>
+          <button class="btn danger" id="resetReactor">Réinitialiser</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Cuve de synthèse</h2>
+          <span class="panel-meta">t = <span id="reactTime">0,0</span> s</span>
+        </div>
+        <div class="panel-body">
+          <canvas id="reactorCanvas" style="width:100%;height:340px;display:block;background:var(--panel-2);border-radius:8px;border:1px solid var(--border);"></canvas>
+          <div class="grid grid-4 mt-12">
+            <div class="gauge"><div class="gauge-label">Température</div><div class="gauge-value" id="gaugeT">20 °C</div><div class="gauge-bar"><div class="gauge-fill" id="gaugeTBar" style="width:0%"></div></div></div>
+            <div class="gauge"><div class="gauge-label">pH</div><div class="gauge-value" id="gaugeP">7,0</div><div class="gauge-bar"><div class="gauge-fill yellow" id="gaugePBar" style="width:50%"></div></div></div>
+            <div class="gauge"><div class="gauge-label">Conversion</div><div class="gauge-value" id="gaugeC">0 %</div><div class="gauge-bar"><div class="gauge-fill green" id="gaugeCBar" style="width:0%"></div></div></div>
+            <div class="gauge"><div class="gauge-label">Produit</div><div class="gauge-value" id="gaugeW">0 g</div><div class="gauge-bar"><div class="gauge-fill green" id="gaugeWBar" style="width:0%"></div></div></div>
+          </div>
+          <div class="alert info mt-12">
+            <span class="alert-icon">ℹ️</span>
+            <div>Le chlorhydrate d'hydroxylamine (bleu) et le cyanate de sodium (violet) sont dosés lentement. La montée en température suit une consigne de 60 °C. Le produit (vert) cristallise en fin de réaction.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THERMO -->
+    <section class="page" id="page-thermo">
+      <div class="page-header">
+        <div>
+          <h1>Thermodynamique</h1>
+          <p>Équilibres, solubilité et spéciation pH</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-header"><h2>Équilibre de la réaction</h2><span class="panel-meta">T, pH variables</span></div>
+          <div class="panel-body">
+            <div class="field">
+              <div class="field-header"><span class="field-label">Température</span><span class="field-value" id="tempVal">333 K (60 °C)</span></div>
+              <input type="range" id="temp" min="273" max="373" value="333" step="1">
+            </div>
+            <div class="field">
+              <div class="field-header"><span class="field-label">pH</span><span class="field-value" id="pHVal">7,0</span></div>
+              <input type="range" id="pH" min="4" max="12" value="7" step="0.1">
+            </div>
+            <div class="value-grid mt-12">
+              <div class="value-item"><div class="v-label">ΔH° (298 K)</div><div class="v-value" id="dH">−248 kJ/mol</div></div>
+              <div class="value-item"><div class="v-label">ΔS° (298 K)</div><div class="v-value" id="dS">−92 J/mol·K</div></div>
+              <div class="value-item"><div class="v-label">ΔG° (T)</div><div class="v-value" id="dG">−217 kJ/mol</div></div>
+              <div class="value-item"><div class="v-label">K<sub>eq</sub></div><div class="v-value green" id="Keq">3,1 × 10³⁶</div></div>
+            </div>
+            <div class="formula">ΔG°(T) = ΔH° − T·ΔS° &nbsp;&nbsp;·&nbsp;&nbsp; K<sub>eq</sub> = exp(−ΔG°/RT)</div>
+            <div class="chart-wrap mt-12" style="height:180px"><canvas id="chartKeq"></canvas></div>
+            <div class="chart-legend">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-blue)"></div>log₁₀ K<sub>eq</sub></div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-red)"></div>T opérationnelle (333 K)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Spéciation pH · Henderson-Hasselbalch</h2><span class="panel-meta">pKa = 10,5</span></div>
+          <div class="panel-body">
+            <div class="formula">pH = pKa + log([A⁻]/[HA]) &nbsp;&nbsp;·&nbsp;&nbsp; α<sub>HA</sub> = 1/(1+10^(pH−pKa))</div>
+            <div class="chart-wrap" style="height:220px"><canvas id="chartSpec"></canvas></div>
+            <div class="chart-legend">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-blue)"></div>Forme neutre (NH-OH)</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-red)"></div>Forme anionique (NH-O⁻)</div>
+            </div>
+            <div class="value-grid mt-12">
+              <div class="value-item"><div class="v-label">α neutre à pH 7</div><div class="v-value" id="alphaN">99,97 %</div></div>
+              <div class="value-item"><div class="v-label">α anion à pH 7</div><div class="v-value red" id="alphaA">0,03 %</div></div>
+              <div class="value-item"><div class="v-label">Solubilité (25 °C)</div><div class="v-value" id="sol">180 g/L</div></div>
+            </div>
+            <div class="alert warn mt-12">
+              <span class="alert-icon">⚠️</span>
+              <div>pH optimum de synthèse : <strong>7,5–8,5</strong>. En milieu trop acide (pH &lt; 5), dégradation de l'hydroxylamine en NH₄⁺. En milieu trop basique (pH &gt; 10), hydrolyse du cyanate en carbonate.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KINETICS -->
+    <section class="page" id="page-kinetics">
+      <div class="page-header">
+        <div>
+          <h1>Cinétique chimique</h1>
+          <p>Loi de vitesse du 2ᵉ ordre · énergie d'activation · temps de réaction</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-header"><h2>Loi de vitesse</h2><span class="panel-meta">ordre 2 global</span></div>
+          <div class="panel-body">
+            <div class="formula">r = k(T) · [NH₂OH] · [OCN⁻]</div>
+            <div class="formula">k(T) = A · exp(−E<sub>a</sub>/RT)</div>
+            <div class="formula">1/[A] − 1/[A]₀ = k·t (ordre 2)</div>
+            <div class="field mt-12">
+              <div class="field-header"><span class="field-label">Température</span><span class="field-value" id="tempKVal">333 K</span></div>
+              <input type="range" id="tempK" min="293" max="363" value="333" step="1">
+            </div>
+            <div class="field">
+              <div class="field-header"><span class="field-label">Concentration initiale</span><span class="field-value" id="c0Val">1,0 M</span></div>
+              <input type="range" id="c0" min="0.1" max="2" value="1.0" step="0.05">
+            </div>
+            <div class="value-grid mt-12">
+              <div class="value-item"><div class="v-label">E<sub>a</sub></div><div class="v-value">58 kJ/mol</div></div>
+              <div class="value-item"><div class="v-label">A (facteur)</div><div class="v-value">2,1 × 10⁸</div></div>
+              <div class="value-item"><div class="v-label">k à T</div><div class="v-value" id="kVal">0,032</div></div>
+              <div class="value-item"><div class="v-label">t<sub>1/2</sub></div><div class="v-value yellow" id="tHalf">31 s</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Profil cinétique</h2><span class="panel-meta">conversion vs temps</span></div>
+          <div class="panel-body">
+            <div class="chart-wrap" style="height:280px"><canvas id="chartKin"></canvas></div>
+            <div class="chart-legend">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-blue)"></div>[NH₂OH]</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--purple)"></div>[OCN⁻]</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--green)"></div>[CH₄N₂O₂]</div>
+            </div>
+            <div class="alert info mt-12">
+              <span class="alert-icon">ℹ️</span>
+              <div>Le temps de réaction pour 99 % de conversion est typiquement de <strong>45–90 min</strong> à 60 °C. L'ordre partiel observé peut dévier si le pH n'est pas maintenu.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ECONOMY -->
+    <section class="page" id="page-economy">
+      <div class="page-header">
+        <div>
+          <h1>Analyse économique</h1>
+          <p>OPEX · CAPEX · coût par kg de produit pur</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-header"><h2>Paramètres économiques</h2><span class="panel-meta">€/kg</span></div>
+          <div class="panel-body">
+            <div class="field">
+              <div class="field-header"><span class="field-label">Prix NH₂OH·HCl</span><span class="field-value" id="prixAVal">8,50 €/kg</span></div>
+              <input type="range" id="prixA" min="4" max="20" value="8.5" step="0.1">
+            </div>
+            <div class="field">
+              <div class="field-header"><span class="field-label">Prix NaOCN</span><span class="field-value" id="prixBVal">3,20 €/kg</span></div>
+              <input type="range" id="prixB" min="1.5" max="8" value="3.2" step="0.1">
+            </div>
+            <div class="field">
+              <div class="field-header"><span class="field-label">Énergie (€/kWh)</span><span class="field-value" id="prixElecVal">0,18 €/kWh</span></div>
+              <input type="range" id="prixElec" min="0.05" max="0.40" value="0.18" step="0.01">
+            </div>
+            <div class="field">
+              <div class="field-header"><span class="field-label">Capacité (kg/an)</span><span class="field-value" id="capVal">5 000 kg/an</span></div>
+              <input type="range" id="cap" min="500" max="50000" value="5000" step="100">
+            </div>
+            <div class="value-grid mt-12">
+              <div class="value-item"><div class="v-label">Coût réactifs</div><div class="v-value" id="coutReact">14,2 €/kg</div></div>
+              <div class="value-item"><div class="v-label">Coût énergie</div><div class="v-value" id="coutElec">2,1 €/kg</div></div>
+              <div class="value-item"><div class="v-label">OPEX total</div><div class="v-value yellow" id="opex">312 €/kg</div></div>
+              <div class="value-item"><div class="v-label">CAPEX estimé</div><div class="v-value" id="capex">1,2 M€</div></div>
+            </div>
+            <div class="formula mt-12">Coût/kg = (m<sub>réactifs</sub> · prix) / (Y · m<sub>produit</sub>) + énergie + amortissement</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Décomposition OPEX</h2><span class="panel-meta">€/kg produit</span></div>
+          <div class="panel-body">
+            <div class="chart-wrap" style="height:240px"><canvas id="chartCout"></canvas></div>
+            <div class="chart-legend mt-12">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-blue)"></div>NH₂OH·HCl</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--purple)"></div>NaOCN</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--green)"></div>Énergie</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--fr-red)"></div>CAPEX/amort.</div>
+            </div>
+            <div class="alert warn mt-12">
+              <span class="alert-icon">⚠️</span>
+              <div>Le coût dominant est la <strong>purification / cristallisation</strong> et les <strong>contrôles qualité</strong> (HPLC, métaux lourds, microbiologie). Le prix de vente pharmacopée est de <strong>900–2 500 €/kg</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAFETY -->
+    <section class="page" id="page-safety">
+      <div class="page-header">
+        <div>
+          <h1>Sécurité & analyse HAZOP</h1>
+          <p>Hydroxylamine · cyanate · produit cytotoxique</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-header"><h2>Propriétés de danger</h2><span class="panel-meta">survolez les lignes</span></div>
+          <div class="panel-body flush">
+            <table class="table">
+              <thead><tr><th>Substance</th><th>Danger</th><th>Niveau</th></tr></thead>
+              <tbody>
+                <tr data-tooltip="NH₂OH·HCl · décomposition explosive au-delà de 130 °C"><td>Hydroxylamine·HCl</td><td>Thermique, explosif</td><td><span class="tag red">Critique</span></td></tr>
+                <tr data-tooltip="Mutagène catégorie 2, sensibilisant cutané"><td>Hydroxylamine·HCl</td><td>CMR / sensibilisant</td><td><span class="tag red">Critique</span></td></tr>
+                <tr data-tooltip="NaOCN · libère HCN en milieu acide"><td>Cyanate de sodium</td><td>Toxique (HCN)</td><td><span class="tag yellow">Élevé</span></td></tr>
+                <tr data-tooltip="Produit cytotoxique · antinéoplasique"><td>Hydroxyurée</td><td>Cytotoxique / tératogène</td><td><span class="tag red">Critique</span></td></tr>
+                <tr data-tooltip="pH extrêmes possibles pendant la réaction"><td>Milieu réactionnel</td><td>Corrosif</td><td><span class="tag yellow">Modéré</span></td></tr>
+                <tr data-tooltip="Poudre fine → risque d'explosion de poussière"><td>Produit sec</td><td>Atmosphère explosive</td><td><span class="tag yellow">Modéré</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Simulateur d'emballement thermique</h2><span class="panel-meta" id="runStatus">Système nominal</span></div>
+          <div class="panel-body">
+            <div class="field">
+              <div class="field-header"><span class="field-label">ΔT (auto-échauffement)</span><span class="field-value" id="runVal">0 °C</span></div>
+              <input type="range" id="run" min="0" max="60" value="0" step="0.5">
+            </div>
+            <div class="grid grid-2 mt-8">
+              <div class="gauge">
+                <div class="gauge-label">T° cuve</div>
+                <div class="gauge-value" id="runT">60 °C</div>
+                <div class="gauge-bar"><div class="gauge-fill" id="runBar" style="width:0%"></div></div>
+              </div>
+              <div class="gauge">
+                <div class="gauge-label">Seuil critique</div>
+                <div class="gauge-value text-yellow">130 °C</div>
+                <div class="gauge-bar"><div class="gauge-fill yellow" style="width:46%"></div></div>
+              </div>
+            </div>
+            <div class="alert info" id="runNote">
+              <span class="alert-icon">ℹ️</span>
+              <div>Faites glisser pour simuler un emballement. Alerte à 80 °C, alarme à 100 °C, décomposition explosive au-delà de 130 °C.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-16">
+        <div class="panel-header"><h2>Analyse HAZOP</h2><span class="panel-meta">6 nœuds · cliquez</span></div>
+        <div class="panel-body flush">
+          <table class="table">
+            <thead><tr><th>Nœud</th><th>Déviation</th><th>Cause</th><th>Conséquence</th><th>Barrière</th></tr></thead>
+            <tbody>
+              <tr data-modal="h1" style="cursor:pointer"><td class="mono">Stockage NH₂OH</td><td>T° haute</td><td>Défaut clim</td><td>Décomposition explosive</td><td><span class="tag blue">Clim + sonde</span></td></tr>
+              <tr data-modal="h2" style="cursor:pointer"><td class="mono">Dosage NaOCN</td><td>Débit excessif</td><td>Vanne bloquée</td><td>Emballement thermique</td><td><span class="tag blue">Débitmètre + RTS</span></td></tr>
+              <tr data-modal="h3" style="cursor:pointer"><td class="mono">Réacteur</td><td>pH bas</td><td>Acide résiduel</td><td>Libération HCN</td><td><span class="tag blue">pH-stat + sonde HCN</span></td></tr>
+              <tr data-modal="h4" style="cursor:pointer"><td class="mono">Réacteur</td><td>Agitation HS</td><td>Panne moteur</td><td>Points chauds, emballement</td><td><span class="tag blue">Doublure + alarme</span></td></tr>
+              <tr data-modal="h5" style="cursor:pointer"><td class="mono">Filtration</td><td>Exposition poudre</td><td>Enceinte ouverte</td><td>Inhalation cytotoxique</td><td><span class="tag blue">Isolateur + EPI</span></td></tr>
+              <tr data-modal="h6" style="cursor:pointer"><td class="mono">Séchage</td><td>T° excessive</td><td>Régulation HS</td><td>Dégradation produit</td><td><span class="tag blue">Thermostat redondant</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPECS -->
+    <section class="page" id="page-specs">
+      <div class="page-header">
+        <div>
+          <h1>Spécifications pharmacopée</h1>
+          <p>USP 42 · Ph. Eur. 9 · ICH Q3D · ICH Q7</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="panel">
+          <div class="panel-header"><h2>Contrôles qualité libératoires</h2><span class="panel-meta">USP/Ph.Eur.</span></div>
+          <div class="panel-body flush">
+            <table class="table">
+              <thead><tr><th>Paramètre</th><th class="num">Cible</th><th>Méthode</th></tr></thead>
+              <tbody>
+                <tr><td>Apparence</td><td class="num accent">Poudre blanche</td><td>Visuel</td></tr>
+                <tr><td>Identification</td><td class="num accent">Conforme</td><td>IR, HPLC</td></tr>
+                <tr><td>Pureté (HPLC)</td><td class="num accent">99,0 – 101,0 %</td><td>HPLC-UV 214 nm</td></tr>
+                <tr><td>Impuretés totales</td><td class="num accent">≤ 1,0 %</td><td>HPLC area%</td></tr>
+                <tr><td>Perte à la dessiccation</td><td class="num accent">≤ 1,0 %</td><td>105 °C, 4 h</td></tr>
+                <tr><td>Résidus d'ignition</td><td class="num accent">≤ 0,1 %</td><td>600 °C</td></tr>
+                <tr><td>Métaux lourds</td><td class="num accent">≤ 20 ppm</td><td>ICP-MS</td></tr>
+                <tr><td>Urea (impureté)</td><td class="num accent">≤ 0,5 %</td><td>HPLC</td></tr>
+                <tr><td>Solvants résiduels</td><td class="num accent">ICH Q3C cl. 2</td><td>GC-HS</td></tr>
+                <tr><td>Endotoxines</td><td class="num accent">≤ 0,5 UI/mg</td><td>LAL</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Données physico-chimiques</h2><span class="panel-meta">référence</span></div>
+          <div class="panel-body flush">
+            <table class="table">
+              <thead><tr><th>Propriété</th><th class="num">Valeur</th><th>Unité</th></tr></thead>
+              <tbody>
+                <tr><td>Formule brute</td><td class="num mono">CH₄N₂O₂</td><td>—</td></tr>
+                <tr><td>Masse molaire</td><td class="num accent">76,05</td><td>g/mol</td></tr>
+                <tr><td>Point de fusion</td><td class="num accent">145–147</td><td>°C (déc.)</td></tr>
+                <tr><td>Solubilité eau (25 °C)</td><td class="num accent">~180</td><td>g/L</td></tr>
+                <tr><td>pKa (hydroxyle)</td><td class="num accent">10,5</td><td>—</td></tr>
+                <tr><td>logP</td><td class="num accent">−1,80</td><td>—</td></tr>
+                <tr><td>Densité (20 °C)</td><td class="num accent">1,83</td><td>g/cm³</td></tr>
+                <tr><td>Point éclair</td><td class="num accent">Non applicable</td><td>—</td></tr>
+                <tr><td>Biodisponibilité orale</td><td class="num accent">~80</td><td>%</td></tr>
+                <tr><td>Demi-vie plasmatique</td><td class="num accent">3–4</td><td>h</td></tr>
+                <tr><td>Excrétion rénale</td><td class="num accent">~50</td><td>% (24 h)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-16">
+        <div class="panel-header"><h2>Formule structurale & pharmacophore</h2><span class="panel-meta">H₂N-C(=O)-NH-OH</span></div>
+        <div class="panel-body">
+          <div class="formula" style="text-align:center;font-size:16px;padding:20px;">
+H₂N—C(=O)—NH—OH  ·  hydroxyle libre · groupe carbamoyle
+
+Mécanisme d'action : inhibition de la ribonucléotide réductase (RRM2) → blocage de la synthèse d'ADN en phase S
+          </div>
+          <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <div>Le groupement <strong>hydroxylamine (–NH-OH)</strong> est le pharmacophore. Toute modification (méthylation, acylation) supprime l'activité inhibitrice de la RRM2.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section class="page" id="page-docs">
+      <div class="page-header">
+        <div>
+          <h1>Documentation technique</h1>
+          <p>Formules de référence, hypothèses du modèle</p>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        <div class="panel">
+          <div class="panel-header"><h2>Stœchiométrie</h2></div>
+          <div class="panel-body flush">
+            <table class="table"><tbody>
+              <tr><td>NH₂OH·HCl</td><td class="num mono accent">69,49 g/mol</td></tr>
+              <tr><td>NaOCN</td><td class="num mono accent">65,01 g/mol</td></tr>
+              <tr><td>CH₄N₂O₂</td><td class="num mono accent">76,05 g/mol</td></tr>
+              <tr><td>NaCl</td><td class="num mono accent">58,44 g/mol</td></tr>
+              <tr><td>Rendement massique max</td><td class="num mono">56,5 %</td></tr>
+              <tr><td>Rendement molaire</td><td class="num mono">≤ 100 %</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2>Thermodynamique</h2></div>
+          <div class="panel-body flush">
+            <table class="table"><tbody>
+              <tr><td>ΔH°<sub>réaction</sub></td><td class="num mono accent">≈ −248 kJ/mol</td></tr>
+              <tr><td>ΔS°<sub>réaction</sub></td><td class="num mono accent">≈ −92 J/mol·K</td></tr>
+              <tr><td>ΔG° (298 K)</td><td class="num mono accent">≈ −220 kJ/mol</td></tr>
+              <tr><td>K<sub>eq</sub> (333 K)</td><td class="num mono accent">≈ 10³⁶</td></tr>
+              <tr><td>pKa hydroxylamine</td><td class="num mono">5,96</td></tr>
+              <tr><td>pKa hydroxyurée</td><td class="num mono">10,5</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2>Cinétique</h2></div>
+          <div class="panel-body flush">
+            <table class="table"><tbody>
+              <tr><td>Ordre global</td><td class="num mono">2</td></tr>
+              <tr><td>E<sub>a</sub></td><td class="num mono">58 kJ/mol</td></tr>
+              <tr><td>A</td><td class="num mono">2,1 × 10⁸</td></tr>
+              <tr><td>k (60 °C)</td><td class="num mono">0,032 M⁻¹·s⁻¹</td></tr>
+              <tr><td>pH optimal</td><td class="num mono">7,5–8,5</td></tr>
+              <tr><td>Solvant</td><td class="num mono">Eau</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-16">
+        <div class="panel-header"><h2>Hypothèses du modèle</h2></div>
+        <div class="panel-body">
+          <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <div>
+              <strong>Stœchiométrie :</strong> voie hydroxylamine/cyanate 1:1, sans réaction secondaire.<br>
+              <strong>Thermodynamique :</strong> ΔH et ΔS supposés constants sur 273–373 K. K<sub>eq</sub> calculé par exp(−ΔG°/RT).<br>
+              <strong>Cinétique :</strong> loi du second ordre avec constante d'Arrhenius E<sub>a</sub> = 58 kJ/mol. pH maintenu constant par pH-stat.<br>
+              <strong>Économie :</strong> CAPEX loi de puissance exposant 0,6 · amortissement 10 ans. Prix des réactifs grade technique.<br>
+              <strong>Limites :</strong> modèle pédagogique. Pour un dossier réglementaire, utiliser données DMF validées, DSC/ARC réels et HAZOP complet.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="sb-item"><div class="sb-dot green"></div>GMP Ready</div>
+    <div class="sb-item">Modèle : CH₄N₂O₂-Synth v1.0</div>
+    <div class="sb-item">Unité : SI</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-item" id="sbClock">--:--:--</div>
+    <div class="sb-item">API · Ph. Eur. 9</div>
+  </div>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Détails</h3>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+/* ============================================================
+   CORE
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const R = 8.314;
+const M_A = 69.49, M_B = 65.01, M_P = 76.05, M_C = 58.44;
+const dH = -248000, dS = -92;
+
+const fmt = (x, d = 2) => isFinite(x)
+  ? x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })
+  : '—';
+
+const fmtSci = x => {
+  if (x === 0) return '0';
+  const exp = Math.floor(Math.log10(Math.abs(x)));
+  const mant = x / Math.pow(10, exp);
+  return `${mant.toFixed(2)} × 10<sup>${exp}</sup>`;
+};
+
+/* ============================================================
+   TOASTS
+   ============================================================ */
+function toast(title, msg, type = 'info', duration = 3000) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<div><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>`;
+  $('toasts').appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const pageTitles = {
+  overview: "Vue d'ensemble", builder: "Constructeur", reactor: "Réacteur",
+  thermo: "Thermodynamique", kinetics: "Cinétique", economy: "Économie",
+  safety: "Sécurité HAZOP", specs: "Pharmacopée", docs: "Documentation"
+};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const page = item.dataset.page;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    $('page-' + page).classList.add('active');
+    $('crumbPage').textContent = pageTitles[page] || page;
+    setTimeout(() => {
+      if (page === 'thermo') { calcThermo(); drawSpecChart(); }
+      if (page === 'kinetics') { calcKinetics(); }
+      if (page === 'economy') calcEco();
+      if (page === 'builder') { resizeMol(); drawMol(); }
+      if (page === 'reactor') resizeReactor();
+    }, 60);
+  });
+});
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+const tooltip = $('tooltip');
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-tooltip]');
+  if (!el) return;
+  tooltip.innerHTML = el.dataset.tooltip;
+  tooltip.classList.add('visible');
+});
+document.addEventListener('mousemove', e => {
+  if (!tooltip.classList.contains('visible')) return;
+  const w = tooltip.offsetWidth, h = tooltip.offsetHeight;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > window.innerWidth - 8) x = e.clientX - w - 14;
+  if (y + h > window.innerHeight - 8) y = e.clientY - h - 14;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+});
+document.addEventListener('mouseout', e => {
+  if (!e.target.closest('[data-tooltip]')) return;
+  tooltip.classList.remove('visible');
+});
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+const modalData = {
+  'app-sickle': { title: '🩸 Drépanocytose', body: `<p>L'hydroxyurée est le traitement de référence de la drépanocytose symptomatique.</p><ul><li>Induction de l'hémoglobine fœtale (HbF)</li><li>Réduction des crises vaso-occlusives de 50 %</li><li>Dose : 15–35 mg/kg/j</li><li>Surveillance NFS mensuelle</li></ul>` },
+  'app-leukemia': { title: '🎗️ Leucémies', body: `<p>Utilisée dans la leucémie myéloïde chronique (LMC) et les syndromes myéloprolifératifs.</p><ul><li>Inhibiteur de la ribonucléotide réductase (RRM2)</li><li>Arrêt de la synthèse d'ADN en phase S</li><li>Association avec radiothérapie</li></ul>` },
+  'app-cancer': { title: '🔬 Tumeurs solides', body: `<p>Radiothérapie potentialisée par l'hydroxyurée dans :</p><ul><li>Carcinome épidermoïde ORL</li><li>Mélanome malin</li><li>Cancer du col utérin</li><li>Glioblastome</li></ul>` },
+  'app-hiv': { title: '🧬 VIH (investigationnel)', body: `<p>L'hydroxyurée potentialise l'activité de la didanosine (ddI) en déplétant les pools de dNTP intracellulaires.</p><p><strong>Usage restreint :</strong> essais cliniques uniquement en raison de la toxicité.</p>` },
+  h1: { title: 'HAZOP · Stockage NH₂OH : T° haute', body: `<p><strong>Déviation :</strong> Température &gt; 25 °C.</p><p><strong>Cause :</strong> Panne de climatisation, exposition solaire.</p><p><strong>Conséquence :</strong> Décomposition explosive de l'hydroxylamine au-delà de 130 °C.</p><h4>Barrières</h4><ul><li>Chambre froide 2–8 °C avec redondance</li><li>Sondes PT100 redondantes</li><li>Stock limité · règle des 3 jours</li></ul>` },
+  h2: { title: 'HAZOP · Dosage NaOCN : débit excessif', body: `<p><strong>Déviation :</strong> Débit &gt; 110 % consigne.</p><p><strong>Cause :</strong> Vanne bloquée, défaut régulateur.</p><p><strong>Conséquence :</strong> Emballement thermique (réaction exothermique).</p><h4>Barrières</h4><ul><li>Débitmètre massique Coriolis</li><li>RTS (Runaway Temperature System)</li><li>Injection d'eau glacée automatique</li></ul>` },
+  h3: { title: 'HAZOP · Réacteur : pH bas', body: `<p><strong>Déviation :</strong> pH &lt; 5.</p><p><strong>Cause :</strong> Acide résiduel, défaut pH-stat.</p><p><strong>Conséquence :</strong> Libération de HCN gazeux (toxique).</p><h4>Barrières</h4><ul><li>pH-stat avec sonde redondante</li><li>Détection HCN dans l'atmosphère</li><li>Scrubber basique en sortie</li></ul>` },
+  h4: { title: 'HAZOP · Réacteur : agitation HS', body: `<p><strong>Déviation :</strong> Arrêt de l'agitation.</p><p><strong>Cause :</strong> Panne moteur, rupture axe.</p><p><strong>Conséquence :</strong> Points chauds, emballement localisé.</p><h4>Barrières</h4><ul><li>Moteur doublé · mesure de couple</li><li>Arrêt automatique du dosage</li><li>Alarme agitation</li></ul>` },
+  h5: { title: 'HAZOP · Filtration : exposition poudre', body: `<p><strong>Déviation :</strong> Poudre cytotoxique en suspension.</p><p><strong>Cause :</strong> Enceinte ouverte, manipulation manuelle.</p><p><strong>Conséquence :</strong> Inhalation · risque tératogène.</p><h4>Barrières</h4><ul><li>Isolateur OEB niveau 4</li><li>EPI complet · surveillance médicale</li><li>Décontamination air HEPA</li></ul>` },
+  h6: { title: 'HAZOP · Séchage : T° excessive', body: `<p><strong>Déviation :</strong> T° &gt; 70 °C.</p><p><strong>Cause :</strong> Défaut thermostat, panne sonde.</p><p><strong>Conséquence :</strong> Dégradation du produit (fusion 145 °C).</p><h4>Barrières</h4><ul><li>Thermostat redondant</li><li>Étuve à vide contrôlée</li><li>Arrêt automatique à 80 °C</li></ul>` }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-modal]');
+  if (!el) return;
+  const data = modalData[el.dataset.modal];
+  if (!data) return;
+  $('modalTitle').textContent = data.title;
+  $('modalBody').innerHTML = data.body;
+  $('modalOverlay').classList.add('visible');
+});
+$('modalClose').addEventListener('click', () => $('modalOverlay').classList.remove('visible'));
+$('modalOverlay').addEventListener('click', e => {
+  if (e.target === $('modalOverlay')) $('modalOverlay').classList.remove('visible');
+});
+
+/* ============================================================
+   MOLECULE BUILDER
+   ============================================================ */
+const molCanvas = $('molCanvas');
+const molCtx = molCanvas.getContext('2d');
+let molecules = [];
+let molAnimId = null;
+let reactFlash = 0;
+
+function resizeMol() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = molCanvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  molCanvas.width = rect.width * dpr;
+  molCanvas.height = rect.height * dpr;
+  molCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function addMolecule(type) {
+  const rect = molCanvas.getBoundingClientRect();
+  const r = type === 'P' ? 18 : (type === 'A' ? 15 : 14);
+  molecules.push({
+    type,
+    x: Math.random() * (rect.width - 100) + 50,
+    y: Math.random() * (rect.height - 100) + 50,
+    vx: (Math.random() - 0.5) * 0.8,
+    vy: (Math.random() - 0.5) * 0.8,
+    r,
+    birth: performance.now()
+  });
+  updateMolCounts();
+  if (!molAnimId) molAnimId = requestAnimationFrame(animateMol);
+}
+
+function updateMolCounts() {
+  $('countA').textContent = molecules.filter(m => m.type === 'A').length;
+  $('countB').textContent = molecules.filter(m => m.type === 'B').length;
+  $('countC').textContent = molecules.filter(m => m.type === 'P').length;
+  $('countD').textContent = molecules.filter(m => m.type === 'C').length;
+}
+
+function reactMolecules() {
+  const A = molecules.filter(m => m.type === 'A');
+  const B = molecules.filter(m => m.type === 'B');
+  const possible = Math.min(A.length, B.length);
+
+  if (possible === 0) {
+    toast('Réaction impossible', 'Il faut au moins 1 NH₂OH·HCl et 1 NaOCN', 'warn');
+    return;
+  }
+
+  const toRemove = new Set();
+  const newP = [];
+  for (let i = 0; i < possible; i++) {
+    const a = A[i], b = B[i];
+    toRemove.add(a); toRemove.add(b);
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    newP.push({
+      type: 'P',
+      x: mx + (Math.random() - 0.5) * 50,
+      y: my + (Math.random() - 0.5) * 50,
+      vx: (Math.random() - 0.5) * 1.0,
+      vy: (Math.random() - 0.5) * 1.0,
+      r: 18, birth: performance.now()
+    });
+    newP.push({
+      type: 'C',
+      x: mx + (Math.random() - 0.5) * 50,
+      y: my + (Math.random() - 0.5) * 50,
+      vx: (Math.random() - 0.5) * 1.0,
+      vy: (Math.random() - 0.5) * 1.0,
+      r: 14, birth: performance.now()
+    });
+  }
+  molecules = molecules.filter(m => !toRemove.has(m));
+  molecules.push(...newP);
+  reactFlash = performance.now();
+
+  const Arest = A.length - possible;
+  const Brest = B.length - possible;
+  let lim = '—', exces = '—';
+  if (Arest === 0 && Brest > 0) { lim = 'NH₂OH·HCl'; exces = Brest + ' NaOCN'; }
+  else if (Brest === 0 && Arest > 0) { lim = 'NaOCN'; exces = Arest + ' NH₂OH·HCl'; }
+  else { lim = 'Stœchiométrique'; exces = 'Aucun'; }
+
+  $('molLimitant').textContent = lim;
+  $('molProduit').textContent = possible;
+  $('molExces').textContent = exces;
+  updateMolCounts();
+  toast('Réaction effectuée', `${possible} mole(s) de CH₄N₂O₂ formée(s)`, 'success');
+}
+
+function drawMol() {
+  const rect = molCanvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  const W = rect.width, H = rect.height;
+  molCtx.clearRect(0, 0, W, H);
+
+  molCtx.strokeStyle = 'rgba(214,224,236,.6)';
+  molCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { molCtx.beginPath(); molCtx.moveTo(x, 0); molCtx.lineTo(x, H); molCtx.stroke(); }
+  for (let y = 0; y < H; y += 40) { molCtx.beginPath(); molCtx.moveTo(0, y); molCtx.lineTo(W, y); molCtx.stroke(); }
+
+  if (performance.now() - reactFlash < 400) {
+    const alpha = 1 - (performance.now() - reactFlash) / 400;
+    molCtx.fillStyle = `rgba(0,85,164,${alpha * 0.12})`;
+    molCtx.fillRect(0, 0, W, H);
+  }
+
+  const now = performance.now();
+  const colors = {
+    A: { fill: '#0055A4', glow: 'rgba(0,85,164,.5)', label: 'NH₂OH·HCl' },
+    B: { fill: '#6B4FBB', glow: 'rgba(107,79,187,.5)', label: 'NaOCN' },
+    P: { fill: '#1B7F4B', glow: 'rgba(27,127,75,.5)', label: 'CH₄N₂O₂' },
+    C: { fill: '#EF4135', glow: 'rgba(239,65,53,.5)', label: 'NaCl' }
+  };
+  molecules.forEach(m => {
+    const c = colors[m.type];
+    const age = (now - m.birth) / 1000;
+    const scale = Math.min(1, age * 4);
+    molCtx.save();
+    molCtx.shadowColor = c.glow;
+    molCtx.shadowBlur = 16 * scale;
+    molCtx.fillStyle = c.fill;
+    molCtx.beginPath();
+    molCtx.arc(m.x, m.y, m.r * scale, 0, Math.PI * 2);
+    molCtx.fill();
+    molCtx.restore();
+    if (scale > 0.5) {
+      molCtx.fillStyle = '#FFF';
+      molCtx.font = `700 ${Math.max(7, m.r * 0.5)}px monospace`;
+      molCtx.textAlign = 'center';
+      molCtx.textBaseline = 'middle';
+      molCtx.fillText(c.label, m.x, m.y + 1);
+    }
+  });
+}
+
+function animateMol() {
+  const rect = molCanvas.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  molecules.forEach(m => {
+    m.x += m.vx; m.y += m.vy;
+    if (m.x < m.r || m.x > W - m.r) { m.vx *= -1; m.x = Math.max(m.r, Math.min(W - m.r, m.x)); }
+    if (m.y < m.r || m.y > H - m.r) { m.vy *= -1; m.y = Math.max(m.r, Math.min(H - m.r, m.y)); }
+  });
+  drawMol();
+  molAnimId = requestAnimationFrame(animateMol);
+}
+
+$('addA').addEventListener('click', () => addMolecule('A'));
+$('addB').addEventListener('click', () => addMolecule('B'));
+$('reactBtn').addEventListener('click', reactMolecules);
+$('resetMol').addEventListener('click', () => {
+  molecules = [];
+  updateMolCounts();
+  $('molLimitant').textContent = '—';
+  $('molProduit').textContent = '0';
+  $('molExces').textContent = '—';
+  drawMol();
+});
+
+/* ============================================================
+   REACTOR
+   ============================================================ */
+const reactorCanvas = $('reactorCanvas');
+const reactCtx = reactorCanvas.getContext('2d');
+let reactorParticles = [];
+let reactorRunning = false;
+let reactorStartTime = 0;
+let reactorState = { T: 20, pH: 7, conv: 0, water: 0 };
+
+function resizeReactor() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = reactorCanvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  reactorCanvas.width = rect.width * dpr;
+  reactorCanvas.height = rect.height * dpr;
+  reactCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawReactor();
+}
+
+function drawReactor() {
+  const rect = reactorCanvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  const W = rect.width, H = rect.height;
+  reactCtx.clearRect(0, 0, W, H);
+  reactCtx.fillStyle = '#F7FAFD';
+  reactCtx.fillRect(0, 0, W, H);
+
+  // Cuve
+  const cx = W / 2, cy = H / 2;
+  const rW = W * 0.6, rH = H * 0.7;
+  reactCtx.fillStyle = 'rgba(0,85,164,.05)';
+  reactCtx.beginPath();
+  reactCtx.roundRect(cx - rW/2, cy - rH/2, rW, rH, 20);
+  reactCtx.fill();
+  reactCtx.strokeStyle = '#B8CCE4';
+  reactCtx.lineWidth = 2;
+  reactCtx.stroke();
+
+  // Agitateur
+  reactCtx.strokeStyle = '#6B7F98';
+  reactCtx.lineWidth = 3;
+  reactCtx.beginPath(); reactCtx.moveTo(cx, cy - rH/2 + 10); reactCtx.lineTo(cx, cy + rH/2 - 20); reactCtx.stroke();
+  reactCtx.beginPath();
+  reactCtx.moveTo(cx - 30, cy + rH/2 - 20);
+  reactCtx.lineTo(cx + 30, cy + rH/2 - 20);
+  reactCtx.stroke();
+
+  // Particules
+  reactorParticles.forEach(p => {
+    reactCtx.save();
+    reactCtx.shadowColor = p.color + '99';
+    reactCtx.shadowBlur = 8;
+    reactCtx.fillStyle = p.color;
+    reactCtx.beginPath();
+    reactCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    reactCtx.fill();
+    reactCtx.restore();
+  });
+
+  // Labels
+  reactCtx.fillStyle = '#6B7F98';
+  reactCtx.font = '700 10px monospace';
+  reactCtx.textAlign = 'center';
+  reactCtx.fillText('RÉACTEUR BATCH · 200 L', cx, 16);
+}
+
+function spawnParticle(type) {
+  const rect = reactorCanvas.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  const cx = W / 2, cy = H / 2;
+  const rW = W * 0.6, rH = H * 0.7;
+  const colors = { A: '#0055A4', B: '#6B4FBB', P: '#1B7F4B' };
+  reactorParticles.push({
+    type,
+    x: cx + (Math.random() - 0.5) * rW * 0.8,
+    y: cy + (Math.random() - 0.5) * rH * 0.7,
+    vx: (Math.random() - 0.5) * 1.5,
+    vy: (Math.random() - 0.5) * 1.5,
+    r: type === 'P' ? 6 : 5,
+    color: colors[type],
+    age: 0
+  });
+}
+
+function updateReactor(dt) {
+  if (Math.random() < 0.3) spawnParticle('A');
+  if (Math.random() < 0.3) spawnParticle('B');
+
+  const rect = reactorCanvas.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  const cx = W / 2, cy = H / 2;
+  const rW = W * 0.6, rH = H * 0.7;
+
+  for (let i = reactorParticles.length - 1; i >= 0; i--) {
+    const p = reactorParticles[i];
+    p.x += p.vx * dt * 60;
+    p.y += p.vy * dt * 60;
+    p.age += dt;
+    const dx = p.x - cx, dy = p.y - cy;
+    if (Math.abs(dx) > rW/2 - p.r || Math.abs(dy) > rH/2 - p.r) {
+      p.vx *= -1; p.vy *= -1;
+      p.x = cx + Math.max(-rW/2 + p.r, Math.min(rW/2 - p.r, dx));
+      p.y = cy + Math.max(-rH/2 + p.r, Math.min(rH/2 - p.r, dy));
+    }
+    if ((p.type === 'A' || p.type === 'B') && Math.random() < 0.015) {
+      p.type = 'P'; p.color = '#1B7F4B'; p.r = 6;
+    }
+  }
+
+  const t = (performance.now() - reactorStartTime) / 1000;
+  reactorState.T = Math.min(60, 20 + t * 4);
+  reactorState.pH = 7 + Math.sin(t * 0.5) * 1.5;
+  reactorState.conv = Math.min(99, t * 8);
+  reactorState.water = Math.min(200000, t * 1500);
+
+  $('gaugeT').textContent = reactorState.T.toFixed(0) + ' °C';
+  $('gaugeTBar').style.width = (reactorState.T / 100 * 100) + '%';
+  $('gaugeP').textContent = reactorState.pH.toFixed(1);
+  $('gaugePBar').style.width = (reactorState.pH / 14 * 100) + '%';
+  $('gaugeC').textContent = reactorState.conv.toFixed(1) + ' %';
+  $('gaugeCBar').style.width = reactorState.conv + '%';
+  $('gaugeW').textContent = reactorState.water.toFixed(0) + ' g';
+  $('gaugeWBar').style.width = (reactorState.water / 200000 * 100) + '%';
+  $('reactTime').textContent = t.toFixed(1).replace('.', ',');
+}
+
+function reactorLoop() {
+  if (!reactorRunning) return;
+  const now = performance.now();
+  const dt = Math.min(0.05, (now - (reactorLoop.last || now)) / 1000);
+  reactorLoop.last = now;
+  updateReactor(dt);
+  drawReactor();
+  requestAnimationFrame(reactorLoop);
+}
+
+$('playReactor').addEventListener('click', () => {
+  reactorRunning = !reactorRunning;
+  $('playReactor').textContent = reactorRunning ? '⏸ Pause' : '▶ Démarrer';
+  if (reactorRunning) {
+    reactorStartTime = performance.now() - (reactorState.T - 20) / 4 * 1000;
+    reactorLoop.last = performance.now();
+    requestAnimationFrame(reactorLoop);
+    toast('Réaction démarrée', 'Dosage NH₂OH·HCl + NaOCN en cours', 'success', 2000);
+  }
+});
+
+$('resetReactor').addEventListener('click', () => {
+  reactorRunning = false;
+  reactorParticles = [];
+  reactorState = { T: 20, pH: 7, conv: 0, water: 0 };
+  reactorStartTime = 0;
+  $('playReactor').textContent = '▶ Démarrer';
+  $('gaugeT').textContent = '20 °C';
+  $('gaugeP').textContent = '7,0';
+  $('gaugeC').textContent = '0 %';
+  $('gaugeW').textContent = '0 g';
+  ['gaugeTBar','gaugePBar','gaugeCBar','gaugeWBar'].forEach(id => $(id).style.width = '0%');
+  $('reactTime').textContent = '0,0';
+  drawReactor();
+});
+
+/* ============================================================
+   THERMO
+   ============================================================ */
+function calcThermo() {
+  const T = parseFloat($('temp').value);
+  const pH = parseFloat($('pH').value);
+  $('tempVal').textContent = T + ' K (' + (T - 273).toFixed(0) + ' °C)';
+  $('pHVal').textContent = pH.toFixed(1);
+
+  const dG = dH - T * dS;
+  const Keq = Math.exp(-dG / (R * T));
+  $('dH').textContent = fmt(dH / 1000, 0) + ' kJ/mol';
+  $('dS').textContent = fmt(dS, 0) + ' J/mol·K';
+  $('dG').textContent = fmt(dG / 1000, 0) + ' kJ/mol';
+  $('Keq').innerHTML = fmtSci(Keq);
+
+  // Spéciation Henderson-Hasselbalch
+  const pKa = 10.5;
+  const alphaN = 1 / (1 + Math.pow(10, pH - pKa));
+  const alphaA = 1 - alphaN;
+  $('alphaN').textContent = fmt(alphaN * 100, 2) + ' %';
+  $('alphaA').textContent = fmt(alphaA * 100, 2) + ' %';
+
+  const sol = 180 * Math.pow(2, (25 - (T - 273)) / 10);
+  $('sol').textContent = fmt(Math.max(20, sol), 0) + ' g/L';
+
+  drawKeqChart(T);
+  drawSpecChart();
+}
+
+function drawKeqChart(Top) {
+  const c = $('chartKeq');
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  if (rect.width === 0) return;
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { l: 44, r: 12, t: 12, b: 24 };
+  const w = W - pad.l - pad.r;
+  const h = H - pad.t - pad.b;
+
+  ctx.strokeStyle = 'rgba(214,224,236,.8)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + h * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + w, y); ctx.stroke();
+  }
+  ctx.strokeStyle = '#B8CCE4';
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + h); ctx.lineTo(pad.l + w, pad.t + h);
+  ctx.stroke();
+
+  const Tmin = 273, Tmax = 373;
+  const logMin = 0, logMax = 60;
+  ctx.strokeStyle = '#0055A4';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 100; i++) {
+    const T = Tmin + (Tmax - Tmin) * i / 100;
+    const dG = dH - T * dS;
+    const logK = Math.log10(Math.exp(-dG / (R * T)));
+    const x = pad.l + w * (T - Tmin) / (Tmax - Tmin);
+    const y = pad.t + h * (1 - (logK - logMin) / (logMax - logMin));
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  const xOp = pad.l + w * (Top - Tmin) / (Tmax - Tmin);
+  ctx.strokeStyle = '#EF4135';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(xOp, pad.t); ctx.lineTo(xOp, pad.t + h); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#6B7F98';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('273 K', pad.l, H - 6);
+  ctx.fillText('323 K', pad.l + w / 2, H - 6);
+  ctx.fillText('373 K', pad.l + w, H - 6);
+  ctx.textAlign = 'right';
+  ctx.fillText('60', pad.l - 6, pad.t + 10);
+  ctx.fillText('0', pad.l - 6, pad.t + h);
+}
+
+function drawSpecChart() {
+  const c = $('chartSpec');
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  if (rect.width === 0) return;
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { l: 40, r: 12, t: 12, b: 24 };
+  const w = W - pad.l - pad.r;
+  const h = H - pad.t - pad.b;
+
+  ctx.strokeStyle = 'rgba(214,224,236,.8)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + h * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + w, y); ctx.stroke();
+  }
+
+  const pHmin = 4, pHmax = 12, pKa = 10.5;
+
+  // Courbe α neutre
+  ctx.strokeStyle = '#0055A4';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 100; i++) {
+    const pH = pHmin + (pHmax - pHmin) * i / 100;
+    const a = 1 / (1 + Math.pow(10, pH - pKa));
+    const x = pad.l + w * (pH - pHmin) / (pHmax - pHmin);
+    const y = pad.t + h * (1 - a);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Courbe α anionique
+  ctx.strokeStyle = '#EF4135';
+  ctx.beginPath();
+  for (let i = 0; i <= 100; i++) {
+    const pH = pHmin + (pHmax - pHmin) * i / 100;
+    const a = 1 - 1 / (1 + Math.pow(10, pH - pKa));
+    const x = pad.l + w * (pH - pHmin) / (pHmax - pHmin);
+    const y = pad.t + h * (1 - a);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Ligne pH opérationnel
+  const xOp = pad.l + w * (7 - pHmin) / (pHmax - pHmin);
+  ctx.strokeStyle = '#1B7F4B';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(xOp, pad.t); ctx.lineTo(xOp, pad.t + h); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#6B7F98';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('pH 4', pad.l, H - 6);
+  ctx.fillText('pH 8', pad.l + w / 2, H - 6);
+  ctx.fillText('pH 12', pad.l + w, H - 6);
+  ctx.textAlign = 'right';
+  ctx.fillText('100 %', pad.l - 6, pad.t + 10);
+  ctx.fillText('0 %', pad.l - 6, pad.t + h);
+}
+
+$('temp').addEventListener('input', calcThermo);
+$('pH').addEventListener('input', calcThermo);
+
+/* ============================================================
+   KINETICS
+   ============================================================ */
+function calcKinetics() {
+  const T = parseFloat($('tempK').value);
+  const c0 = parseFloat($('c0').value);
+  $('tempKVal').textContent = T + ' K';
+  $('c0Val').textContent = c0.toFixed(2) + ' M';
+
+  const Ea = 58000, A = 2.1e8;
+  const k = A * Math.exp(-Ea / (R * T));
+  const tHalf = 1 / (k * c0);
+
+  $('kVal').textContent = k.toFixed(4);
+  $('tHalf').textContent = tHalf < 60 ? tHalf.toFixed(1) + ' s' : (tHalf / 60).toFixed(1) + ' min';
+
+  drawKinChart(k, c0);
+}
+
+function drawKinChart(k, c0) {
+  const c = $('chartKin');
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  if (rect.width === 0) return;
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { l: 44, r: 12, t: 12, b: 24 };
+  const w = W - pad.l - pad.r;
+  const h = H - pad.t - pad.b;
+
+  ctx.strokeStyle = 'rgba(214,224,236,.8)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + h * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + w, y); ctx.stroke();
+  }
+
+  // Temps max = 3 × t_99%
+  const tMax = 3 / (k * c0);
+  const N = 100;
+
+  // [A] et [B] (second ordre 1:1) : [A] = c0 / (1 + c0·k·t)
+  ctx.strokeStyle = '#0055A4';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const t = tMax * i / N;
+    const cA = c0 / (1 + c0 * k * t);
+    const x = pad.l + w * i / N;
+    const y = pad.t + h * (1 - cA / c0);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // [CH4N2O2] et [NaCl] = c0 - cA
+  ctx.strokeStyle = '#1B7F4B';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const t = tMax * i / N;
+    const cA = c0 / (1 + c0 * k * t);
+    const cP = c0 - cA;
+    const x = pad.l + w * i / N;
+    const y = pad.t + h * (1 - cP / c0);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#6B7F98';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('0 s', pad.l, H - 6);
+  ctx.fillText((tMax / 2).toFixed(0) + ' s', pad.l + w / 2, H - 6);
+  ctx.fillText(tMax.toFixed(0) + ' s', pad.l + w, H - 6);
+  ctx.textAlign = 'right';
+  ctx.fillText('100 %', pad.l - 6, pad.t + 10);
+  ctx.fillText('0 %', pad.l - 6, pad.t + h);
+}
+
+$('tempK').addEventListener('input', calcKinetics);
+$('c0').addEventListener('input', calcKinetics);
+
+/* ============================================================
+   ECONOMY
+   ============================================================ */
+let ecoData = { cA: 0, cB: 0, cElec: 0, amort: 0 };
+
+function calcEco() {
+  const pA = parseFloat($('prixA').value);
+  const pB = parseFloat($('prixB').value);
+  const pElec = parseFloat($('prixElec').value);
+  const cap = parseFloat($('cap').value);
+
+  $('prixAVal').textContent = fmt(pA, 2) + ' €/kg';
+  $('prixBVal').textContent = fmt(pB, 2) + ' €/kg';
+  $('prixElecVal').textContent = fmt(pElec, 2) + ' €/kWh';
+  $('capVal').textContent = cap.toLocaleString('fr-FR') + ' kg/an';
+
+  // Rendement massique 56.5%, rendement industriel 88% => masse réactifs pour 1 kg produit :
+  const Y = 0.88;
+  const mReactA = (M_A / M_P) / Y;   // kg NH2OH.HCl par kg produit
+  const mReactB = (M_B / M_P) / Y;   // kg NaOCN par kg produit
+  const cA = mReactA * pA;
+  const cB = mReactB * pB;
+  const cElec = 12 * pElec;           // kWh/kg produit (chauffage, agitation, séchage)
+  const capex = 8e5 * Math.pow(cap / 5000, 0.6);
+  const amort = capex / (cap * 10);
+  const opex = cA + cB + cElec + amort;
+
+  $('coutReact').textContent = fmt(cA + cB, 1) + ' €/kg';
+  $('coutElec').textContent = fmt(cElec, 1) + ' €/kg';
+  $('opex').textContent = fmt(opex, 0) + ' €/kg';
+  $('capex').textContent = capex > 1e6 ? fmt(capex / 1e6, 2) + ' M€' : fmt(capex / 1e3, 0) + ' k€';
+
+  ecoData = { cA, cB, cElec, amort };
+  drawCoutChart();
+}
+
+function drawCoutChart() {
+  const c = $('chartCout');
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  if (rect.width === 0) return;
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { l: 110, r: 80, t: 12, b: 12 };
+  const w = W - pad.l - pad.r;
+  const h = H - pad.t - pad.b;
+
+  const items = [
+    { label: 'NH₂OH·HCl', val: ecoData.cA, color: '#0055A4' },
+    { label: 'NaOCN', val: ecoData.cB, color: '#6B4FBB' },
+    { label: 'Énergie', val: ecoData.cElec, color: '#1B7F4B' },
+    { label: 'CAPEX/amort.', val: ecoData.amort, color: '#EF4135' }
+  ];
+  const max = Math.max(...items.map(i => i.val), 1);
+  const rowH = h / items.length;
+
+  items.forEach((item, i) => {
+    const y = pad.t + i * rowH + rowH * 0.15;
+    const barH = rowH * 0.7;
+    const barW = w * (item.val / max);
+
+    ctx.fillStyle = '#EAF1F8';
+    ctx.fillRect(pad.l, y, w, barH);
+    ctx.fillStyle = item.color;
+    ctx.fillRect(pad.l, y, barW, barH);
+
+    ctx.fillStyle = '#2C4A6E';
+    ctx.font = '700 11px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.label, pad.l - 10, y + barH / 2);
+
+    ctx.fillStyle = '#0B2545';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmt(item.val, 1) + ' €', pad.l + w + 10, y + barH / 2);
+  });
+}
+
+$('prixA').addEventListener('input', calcEco);
+$('prixB').addEventListener('input', calcEco);
+$('prixElec').addEventListener('input', calcEco);
+$('cap').addEventListener('input', calcEco);
+
+/* ============================================================
+   SAFETY – THERMAL RUNAWAY
+   ============================================================ */
+$('run').addEventListener('input', () => {
+  const dT = parseFloat($('run').value);
+  const T = 60 + dT;
+  $('runVal').textContent = '+' + fmt(dT, 1) + ' °C';
+  $('runT').textContent = T.toFixed(1) + ' °C';
+  $('runBar').style.width = Math.min(100, dT / 60 * 100) + '%';
+
+  const status = $('runStatus');
+  const note = $('runNote');
+  if (T < 80) {
+    status.textContent = 'Système nominal';
+    status.style.color = 'var(--text-3)';
+    $('runBar').style.background = 'var(--fr-blue)';
+    note.className = 'alert info';
+    note.innerHTML = `<span class="alert-icon">ℹ️</span><div>Température normale (60 °C). Réaction sous contrôle.</div>`;
+  } else if (T < 100) {
+    status.textContent = '⚠️ Alerte 80 °C';
+    status.style.color = 'var(--yellow)';
+    $('runBar').style.background = 'var(--yellow)';
+    note.className = 'alert warn';
+    note.innerHTML = `<span class="alert-icon">⚠️</span><div><strong>Alerte 80 °C :</strong> réduire le débit de dosage, vérifier le refroidissement.</div>`;
+  } else if (T < 130) {
+    status.textContent = '🚨 Alarme 100 °C';
+    status.style.color = 'var(--fr-red)';
+    $('runBar').style.background = 'var(--fr-red)';
+    note.className = 'alert danger';
+    note.innerHTML = `<span class="alert-icon">🚨</span><div><strong>Alarme 100 °C :</strong> arrêt d'urgence du dosage, injection d'eau glacée.</div>`;
+  } else {
+    status.textContent = '💥 Zone explosive';
+    status.style.color = 'var(--fr-red)';
+    $('runBar').style.background = 'var(--fr-red)';
+    note.className = 'alert danger';
+    note.innerHTML = `<span class="alert-icon">💥</span><div><strong>DANGER :</strong> température &gt; 130 °C → décomposition explosive de l'hydroxylamine. Évacuation.</div>`;
+  }
+});
+
+/* ============================================================
+   EXPORT & PRINT
+   ============================================================ */
+$('exportBtn').addEventListener('click', () => {
+  const data = {
+    timestamp: new Date().toISOString(),
+    molecule: 'Hydroxyurée CH4N2O2',
+    thermo: {
+      T: parseFloat($('temp').value),
+      pH: parseFloat($('pH').value),
+      dG: $('dG').textContent,
+      Keq: $('Keq').textContent
+    },
+    kinetics: {
+      T: parseFloat($('tempK').value),
+      c0: parseFloat($('c0').value),
+      k: $('kVal').textContent,
+      tHalf: $('tHalf').textContent
+    },
+    economy: {
+      prixA: parseFloat($('prixA').value),
+      prixB: parseFloat($('prixB').value),
+      capacite: parseFloat($('cap').value),
+      opex: $('opex').textContent,
+      capex: $('capex').textContent
+    }
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hydroxyurea-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Export réussi', 'Données sauvegardées en JSON', 'success');
+});
+
+$('printBtn').addEventListener('click', () => window.print());
+
+/* ============================================================
+   CLOCK
+   ============================================================ */
+function updateClock() {
+  $('sbClock').textContent = new Date().toLocaleTimeString('fr-FR');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'p') { e.preventDefault(); $('printBtn').click(); }
+    if (e.key === 'e') { e.preventDefault(); $('exportBtn').click(); }
+  }
+  if (e.key === 'Escape') $('modalOverlay').classList.remove('visible');
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  calcThermo();
+  calcKinetics();
+  calcEco();
+  setTimeout(() => {
+    resizeMol(); drawMol();
+    resizeReactor();
+    drawSpecChart();
+    drawKinChart(0.032, 1);
+    drawCoutChart();
+  }, 200);
+}
+
+window.addEventListener('resize', () => {
+  drawMol();
+  drawKeqChart(parseFloat($('temp').value));
+  drawSpecChart();
+  drawKinChart(0.032, 1);
+  drawCoutChart();
+  drawReactor();
+});
+
+init();
+
+setTimeout(() => {
+  toast('Hydroxyurée Synthesis Console', 'CH₄N₂O₂ · API · Ctrl+E export · Ctrl+P impression', 'info', 5000);
+}, 800);
+</script>
+</body>
+</html>
